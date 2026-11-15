@@ -1,122 +1,56 @@
-import { useState } from 'react'
-import heroImg from './assets/hero.png'
-import reactLogo from './assets/react.svg'
-import viteLogo from './assets/vite.svg'
+import { useEffect, useRef, useState } from 'react'
 import './App.css'
 
-function App() {
-  const [count, setCount] = useState(0)
-
-  return (
-    <>
-      <section id="center">
-        <div className="hero">
-          <img src={heroImg} className="base" width="170" height="179" alt="" />
-          <img src={reactLogo} className="framework" alt="React logo" />
-          <img src={viteLogo} className="vite" alt="Vite logo" />
-        </div>
-        <div>
-          <h1>Get started</h1>
-          <p>
-            Edit <code>src/App.jsx</code> and save to test <code>HMR</code>
-          </p>
-        </div>
-        <button
-          type="button"
-          className="counter"
-          onClick={() => setCount((count) => count + 1)}
-        >
-          Count is {count}
-        </button>
-      </section>
-
-      <div className="ticks"></div>
-
-      <section id="next-steps">
-        <div id="docs">
-          <svg className="icon" role="presentation" aria-hidden="true">
-            <use href="/icons.svg#documentation-icon"></use>
-          </svg>
-          <h2>Documentation</h2>
-          <p>Your questions, answered</p>
-          <ul>
-            <li>
-              <a href="https://vite.dev/" target="_blank">
-                <img className="logo" src={viteLogo} alt="" />
-                Explore Vite
-              </a>
-            </li>
-            <li>
-              <a href="https://react.dev/" target="_blank">
-                <img className="button-icon" src={reactLogo} alt="" />
-                Learn more
-              </a>
-            </li>
-          </ul>
-        </div>
-        <div id="social">
-          <svg className="icon" role="presentation" aria-hidden="true">
-            <use href="/icons.svg#social-icon"></use>
-          </svg>
-          <h2>Connect with us</h2>
-          <p>Join the Vite community</p>
-          <ul>
-            <li>
-              <a href="https://github.com/vitejs/vite" target="_blank">
-                <svg
-                  className="button-icon"
-                  role="presentation"
-                  aria-hidden="true"
-                >
-                  <use href="/icons.svg#github-icon"></use>
-                </svg>
-                GitHub
-              </a>
-            </li>
-            <li>
-              <a href="https://chat.vite.dev/" target="_blank">
-                <svg
-                  className="button-icon"
-                  role="presentation"
-                  aria-hidden="true"
-                >
-                  <use href="/icons.svg#discord-icon"></use>
-                </svg>
-                Discord
-              </a>
-            </li>
-            <li>
-              <a href="https://x.com/vite_js" target="_blank">
-                <svg
-                  className="button-icon"
-                  role="presentation"
-                  aria-hidden="true"
-                >
-                  <use href="/icons.svg#x-icon"></use>
-                </svg>
-                X.com
-              </a>
-            </li>
-            <li>
-              <a href="https://bsky.app/profile/vite.dev" target="_blank">
-                <svg
-                  className="button-icon"
-                  role="presentation"
-                  aria-hidden="true"
-                >
-                  <use href="/icons.svg#bluesky-icon"></use>
-                </svg>
-                Bluesky
-              </a>
-            </li>
-          </ul>
-        </div>
-      </section>
-
-      <div className="ticks"></div>
-      <section id="spacer"></section>
-    </>
-  )
+const TITLES = {home:['나의 주거생활','오늘도 편안한 자취생활을 시작해요'],entry:['내 정보','로그인 후 내 정보를 관리할 수 있어요'],login:['주거생활을 더 간편하게','DOBBY 계정으로 시작하세요'],signup:['회원가입','DOBBY 계정을 만들어 주세요'],find:['아이디 찾기','가입 시 등록한 정보를 입력해 주세요'],reset:['비밀번호 재설정','본인 확인 후 비밀번호를 변경해 주세요'],houseNew:['내 집 등록','집 기본정보를 입력해 주세요'],contractNew:['계약 정보 등록','계약 정보를 입력해 주세요'],house:['계약 관리','집과 계약 정보를 한눈에 확인하세요'],archive:['입주 당시 사진·하자 기록','입주 당시 상태와 하자 내용을 사진으로 남겨요'],archiveNew:['입주 사진·하자 등록','사진과 입주 당시 상태를 함께 기록하세요'],repair:['하자·수리 관리','하자 내용과 실제 수리한 내용을 기록해요'],gallery:['전체 사진 보기','등록된 사진을 한 화면에서 모두 확인해요'],expenses:['주거비 관리','월세·관리비를 한눈에 확인하세요'],expenseNew:['주거비 등록','월세와 관리비를 입력해 주세요'],community:['우리 동네 커뮤니티','이웃과 이야기하고 관심 글을 모아봐요'],postNew:['게시글 작성','커뮤니티에 글을 작성해 주세요'],posts:['전체 게시글','이웃이 작성한 게시글을 둘러보세요'],post:['게시글 상세','게시글을 읽고 댓글을 남겨요'],favorites:['즐겨찾기','저장한 관심 게시글을 모아봐요'],polls:['커뮤니티 투표','다른 사람들의 의견을 확인하세요'],pollNew:['투표 작성','투표 제목과 항목을 입력해 주세요'],delivery:['배달 최소금액 맞추기','함께 배달 주문할 사람을 찾아요'],deliveryNew:['배달 게시글 작성','함께 주문할 이웃을 찾아요'],risk:['계약서 점검','계약서 확인 항목을 안내해요'],my:['마이페이지','내 정보와 집 정보를 관리해요'],profile:['개인정보 수정','개인정보를 변경해 주세요'],password:['비밀번호 변경','비밀번호를 안전하게 변경해 주세요'],houseEdit:['집 정보 수정','집과 계약 정보를 수정해 주세요'],houseFields:['집 기본정보 수정','집 기본정보를 변경해 주세요'],contractEdit:['계약 정보 수정','계약 정보를 변경해 주세요'],notifications:['댓글·답글 알림','내 게시글에 달린 댓글을 확인해요']}
+const HOUSE_FIELDS=[['주소','도로명 주소 검색','address'],['상세 주소','동·호수 입력','detail'],['건물명','건물명 입력 (선택)','building']]
+const CONTRACT_FIELDS=[['계약 시작일','YYYY.MM.DD','start'],['계약 만료일','YYYY.MM.DD','end'],['보증금','금액 입력','deposit'],['월세','금액 입력','rent'],['관리비','금액 입력','fee'],['월세 납부일','납부일 입력','due']]
+function useSaved(key, initial){const [value,setValue]=useState(()=>{try{const v=localStorage.getItem('dobby-demo-'+key);return v?JSON.parse(v):initial}catch{return initial}});useEffect(()=>{try{localStorage.setItem('dobby-demo-'+key,JSON.stringify(value))}catch{ /* storage may be unavailable */ }},[key,value]);return [value,setValue]}
+const today=()=>new Date().toLocaleString('ko-KR')
+function Field({label,placeholder,type='text',value,onChange,multi=false}){return <label className="field"><span>{label}</span>{multi?<textarea rows="3" placeholder={placeholder} value={value??''} onChange={e=>onChange(e.target.value)}/>:<input type={type} placeholder={placeholder} value={value??''} onChange={e=>onChange(e.target.value)}/>}</label>}
+function Card({title,sub,icon='▤',onClick,children}){return <button type="button" className="menu-card" onClick={onClick}><span className="menu-icon">{icon}</span><span className="menu-content"><strong>{title}</strong>{sub&&<small>{sub}</small>}{children}</span><span className="chevron">›</span></button>}
+function Empty({icon='▤',title,sub}){return <div className="empty"><span className="empty-icon">{icon}</span><strong>{title}</strong>{sub&&<p>{sub}</p>}</div>}
+function App(){
+ const [page,setPage]=useState('home'),[history,setHistory]=useState([]),[toast,setToast]=useState(''),[house,setHouse]=useSaved('house',{}),[contract,setContract]=useSaved('contract',{}),[profile,setProfile]=useSaved('profile',{}),[expenses,setExpenses]=useSaved('expenses',[]),[photos,setPhotos]=useSaved('photos',[]),[issues,setIssues]=useSaved('issues',[]),[posts,setPosts]=useSaved('posts',[]),[favorites,setFavorites]=useSaved('favorites',[]),[polls,setPolls]=useSaved('polls',[]),[delivery,setDelivery]=useSaved('delivery',[]),[notifications,setNotifications]=useSaved('notifications',[]),[draft,setDraft]=useState({}),[selectedPost,setSelectedPost]=useState(null),[pollChoice,setPollChoice]=useState({});
+ const fileRef=useRef(null);const go=p=>{setHistory(h=>[...h,page]);setPage(p);setDraft({});window.scrollTo(0,0)};const back=()=>{setPage(history.at(-1)||'home');setHistory(h=>h.slice(0,-1));setDraft({})};const note=t=>{setToast(t);setTimeout(()=>setToast(''),3500)};const update=(k,v)=>setDraft(d=>({...d,[k]:v}));
+ const save=(setter,next,dest,message='저장되었습니다')=>{setter(next);note(message);go(dest)};
+ const photoAdd=e=>{const files=[...(e.target.files||[])];if(!files.length)return;const allowed=files.filter(f=>f.type.startsWith('image/')&&f.size<3*1024*1024);if(allowed.length!==files.length)note('3MB 미만의 이미지 파일만 추가할 수 있어요');Promise.all(allowed.map(f=>new Promise(resolve=>{const reader=new FileReader();reader.onload=()=>resolve({id:crypto.randomUUID(),url:reader.result,name:f.name,created:today()});reader.readAsDataURL(f)}))).then(list=>{setPhotos(p=>[...p,...list]);note(`${list.length}장의 사진이 추가되었습니다`)});e.target.value=''};
+ const photoGrid=(full=false)=><><div className={'photo-grid '+(full?'gallery-grid':'')}>{(full?photos:photos.slice(0,3)).map(p=><div className="photo-tile" key={p.id}><img src={p.url} alt={p.name}/>{full&&<button type="button" className="photo-remove" onClick={()=>setPhotos(s=>s.filter(x=>x.id!==p.id))} aria-label="사진 삭제">×</button>}</div>)}{!full&&Array.from({length:Math.max(0,3-Math.min(photos.length,3))},(_,i)=><button className="photo-tile plus" key={'add'+i} onClick={()=>fileRef.current?.click()}>＋</button>)}{!full&&<button className="photo-tile all" onClick={()=>go('gallery')}>＋<small>전체 사진 보기</small></button>}</div>{full&&photos.length===0&&<Empty icon="▧" title="등록된 사진이 없습니다" sub="사진을 등록하면 전체 목록에 표시돼요"/>}</>;
+ const form=(fields,defaults,onSave,label)=> <form className="form" onSubmit={e=>{e.preventDefault();onSave({...defaults,...draft})}}>{fields.map(([name,placeholder,key,type])=><Field key={key} label={name} placeholder={placeholder} type={type||'text'} value={draft[key]??defaults[key]??''} onChange={v=>update(key,v)}/>)}<button className="primary" type="submit">{label}</button></form>;
+ const communityList=items=>items.map(item=><article className="feed-card" key={item.id}><button className="feed-open" onClick={()=>{setSelectedPost(item.id);go('post')}}><strong>{item.title}</strong><p>{item.content}</p><small>{item.created}</small></button><button className="bookmark" onClick={()=>setFavorites(f=>f.includes(item.id)?f.filter(x=>x!==item.id):[...f,item.id])} aria-label="즐겨찾기">{favorites.includes(item.id)?'★':'☆'}</button></article>);
+ const currentPost=posts.find(p=>p.id===selectedPost);
+ const content=()=>{switch(page){
+ case 'home':return <><section className="hero-card"><strong>내 집 계약 현황</strong><h3>{contract.end?`계약 만료일 ${contract.end}`:'등록된 계약 정보가 없습니다'}</h3><p>{house.address||'집 정보를 등록하면 계약 현황이 표시돼요'}</p><button className="text-link" onClick={()=>go('house')}>집·계약 정보 조회　›</button></section><h3 className="section-title">주거생활 관리</h3><div className="tile-grid">{[['▤','집·계약 기본정보','house'],['▧','입주 하자 아카이빙','archive'],['▥','주거비 대시보드','expenses'],['⚒','하자·수리 관리','repair']].map(([icon,title,to])=><button className="home-tile" key={to} onClick={()=>go(to)}><span>{icon}</span><strong>{title}</strong></button>)}</div><h3 className="section-title">생활 알림</h3><div className="panel"><strong>월세 납부일 및 생활 알림</strong><p>{contract.due?`매월 ${contract.due}일 월세 납부`:'등록된 일정이 없습니다'}</p></div></>;
+ case 'entry':return <div className="entry"><div className="avatar">◉</div><h3>로그인이 필요합니다</h3><p>로그인하면 집과 계약 정보를 관리할 수 있어요</p><button className="primary" onClick={()=>go('login')}>로그인</button><button className="secondary" onClick={()=>go('signup')}>회원가입</button></div>;
+ case 'login':return <>{form([['이메일','이메일 주소 입력','email','email'],['비밀번호','비밀번호 입력','pw','password']],{},()=>note('로그인은 서버 연동 후 이용할 수 있어요'),'로그인')}<div className="inline-links"><button onClick={()=>go('find')}>아이디 찾기</button><button onClick={()=>go('reset')}>비밀번호 재설정</button><button onClick={()=>go('signup')}>회원가입</button></div><div className="panel tagline">임차인 중심 주거생활 관리<br/>계약, 하자, 주거비까지<br/>하나의 서비스에서 확인하세요</div></>;
+ case 'signup':return form([['이름','이름 입력','name'],['이메일','이메일 주소 입력','email','email'],['전화번호','휴대전화 번호 입력','phone'],['비밀번호','비밀번호 입력','pw','password'],['비밀번호 확인','비밀번호 다시 입력','confirm','password']],{},()=>note('회원가입은 서버 연동 후 이용할 수 있어요'),'회원가입');
+ case 'find':return form([['이름','이름 입력','name'],['전화번호','휴대전화 번호 입력','phone']],{},()=>note('계정 조회는 서버 연동 후 이용할 수 있어요'),'아이디 찾기');
+ case 'reset':return form([['이메일','이메일 주소 입력','email'],['전화번호','휴대전화 번호 입력','phone'],['새 비밀번호','새 비밀번호 입력','pw','password'],['비밀번호 확인','비밀번호 다시 입력','confirm','password']],{},()=>note('비밀번호 재설정은 서버 연동 후 이용할 수 있어요'),'비밀번호 재설정');
+ case 'houseNew':case 'houseFields':return form(HOUSE_FIELDS,house,v=>save(setHouse,v,page==='houseNew'?'contractNew':'houseEdit'),page==='houseNew'?'다음 · 계약 정보 입력':'변경사항 저장');
+ case 'contractNew':case 'contractEdit':return form(CONTRACT_FIELDS,contract,v=>save(setContract,v,page==='contractNew'?'house':'houseEdit'),page==='contractNew'?'입력 완료':'변경사항 저장');
+ case 'house':return <><div className="hero-card"><strong>계약 만료 D-Day</strong><h3>{contract.end||'계약 정보 미등록'}</h3></div><div className="panel"><strong>집 기본정보</strong><p>{house.address?[house.address,house.detail,house.building].filter(Boolean).join(' · '):'등록된 집 정보가 없습니다'}</p></div><div className="panel"><strong>계약 정보</strong><p>{contract.start?`${contract.start} ~ ${contract.end} · 월세 ${contract.rent||'-'}원`:'등록된 계약 정보가 없습니다'}</p></div><div className="panel"><strong>월세 납부일 및 생활 알림</strong><p>{contract.due?`매월 ${contract.due}일`:'등록된 일정이 없습니다'}</p></div><button className="primary" onClick={()=>go(house.address?'houseEdit':'houseNew')}>{house.address?'집·계약 정보 수정':'내 집 등록'}</button></>;
+ case 'archive':return <><div className="panel"><h3>입주 당시 사진</h3>{photoGrid()}<p className="hint">사진을 등록하면 이곳에 미리보기가 표시돼요</p></div><button className="primary" onClick={()=>go('archiveNew')}>＋ 사진·하자 기록 작성</button><div className="panel"><strong>등록된 하자 기록</strong>{issues.length?issues.map(i=><div className="record" key={i.id}><strong>{i.problem||'입주 당시 기록'}</strong><p>{i.created}</p></div>):<p>아직 등록된 기록이 없습니다</p>}</div><button className="secondary" onClick={()=>go('repair')}>하자·수리 관리로 이동</button></>;
+ case 'archiveNew':case 'repair':return <><div className="panel"><h3>사진 등록</h3>{photoGrid()}<p className="hint">＋ 버튼으로 사진을 추가하거나 전체 사진을 확인해요</p></div><form className="form" onSubmit={e=>{e.preventDefault();if(!draft.problem?.trim()&&!draft.fixed?.trim()){note('하자 또는 수리 내용을 입력해 주세요');return}save(setIssues,[{id:crypto.randomUUID(),problem:draft.problem||'',fixed:draft.fixed||'',kind:page,created:today()},...issues],page==='repair'?'archive':'archive')}}><Field label={page==='repair'?'발생한 하자':'하자 내용'} placeholder={page==='repair'?'어디에 어떤 문제가 있었나요?':'어느 위치에 어떤 하자가 있었는지 작성해 주세요'} value={draft.problem} onChange={v=>update('problem',v)} multi/>{page==='repair'&&<Field label="수리한 내용" placeholder="무엇을 어떻게 수리했나요?" value={draft.fixed} onChange={v=>update('fixed',v)} multi/>}<p className="hint">등록 시각은 기록 저장 시 표시됩니다</p><button className="primary" type="submit">{page==='repair'?'하자·수리 기록 저장':'기록 저장'}</button></form></>;
+ case 'gallery':return <><div className="panel"><div className="split"><strong>등록된 사진</strong><small>{photos.length}장</small></div>{photoGrid(true)}</div><button className="secondary" onClick={()=>fileRef.current?.click()}>＋ 사진 추가</button><button className="primary" onClick={()=>go('repair')}>하자·수리 관리로 돌아가기</button></>;
+ case 'expenses':return <><div className="hero-card"><strong>이번 달 주거비</strong><h3>{expenses.length?`${Number(expenses[0].rent||0)+Number(expenses[0].fee||0)}원`:'등록된 지출이 없습니다'}</h3></div><button className="primary" onClick={()=>go('expenseNew')}>＋ 월세·관리비 등록</button><div className="panel"><strong>월별 지출 그래프</strong>{expenses.length?<div className="bars">{expenses.slice(0,5).reverse().map(x=><div key={x.id}><div style={{height:Math.max(15,(Number(x.rent||0)+Number(x.fee||0))/Math.max(1,...expenses.map(v=>Number(v.rent||0)+Number(v.fee||0)))*140)}}/><small>{x.created.slice(0,10)}</small></div>)}</div>:<p>등록된 지출 데이터가 없습니다</p>}</div><div className="panel"><strong>지출 내역 조회</strong>{expenses.length?expenses.map(x=><p key={x.id}>월세 {x.rent||0}원 · 관리비 {x.fee||0}원</p>):<p>등록된 지출 내역이 없습니다</p>}</div></>;
+ case 'expenseNew':return form([['월세','월세 금액 입력','rent','number'],['관리비','관리비 금액 입력','fee','number']],{},v=>save(setExpenses,[{...v,id:crypto.randomUUID(),created:today()},...expenses],'expenses'),'저장');
+ case 'community':return <><button className="primary" onClick={()=>go('postNew')}>＋ 글쓰기</button><div className="menu-stack"><Card title="전체 게시글" sub="게시글을 읽고 댓글을 남겨요" icon="▤" onClick={()=>go('posts')}/><Card title="☆ 즐겨찾기" sub="관심 있는 글을 모아봐요" icon="☆" onClick={()=>go('favorites')}/><Card title="투표" sub="이웃의 의견을 확인해요" icon="◉" onClick={()=>go('polls')}/><Card title="배달 함께하기" sub="배달 최소금액을 함께 맞춰요" icon="▧" onClick={()=>go('delivery')}/><Card title="알림" sub="내 글의 댓글·답글 알림" icon="♧" onClick={()=>go('notifications')}/></div></>;
+ case 'postNew':return form([['제목','제목 입력','title'],['내용','내용을 입력해 주세요','content']],{},v=>{if(!v.title?.trim()||!v.content?.trim()){note('제목과 내용을 입력해 주세요');return}save(setPosts,[{...v,id:crypto.randomUUID(),comments:[],created:today()},...posts],'posts','게시글이 작성되었습니다 (이 브라우저에만 저장)')},'게시글 등록');
+ case 'posts':return <>{posts.length?communityList(posts):<Empty title="아직 등록된 게시글이 없습니다"/>}<button className="primary" onClick={()=>go('postNew')}>＋ 글쓰기</button><button className="secondary" onClick={()=>go('community')}>커뮤니티로 돌아가기</button></>;
+ case 'post':return currentPost?<><div className="panel"><h3>{currentPost.title}</h3><p className="post-body">{currentPost.content}</p><small>{currentPost.created}</small></div><button className="secondary" onClick={()=>setFavorites(f=>f.includes(currentPost.id)?f.filter(x=>x!==currentPost.id):[...f,currentPost.id])}>{favorites.includes(currentPost.id)?'★ 즐겨찾기 해제':'☆ 즐겨찾기 추가'}</button><div className="panel"><strong>댓글 {currentPost.comments?.length||0}</strong>{(currentPost.comments||[]).map(c=><div className="record" key={c.id}><p>{c.content}</p><small>{c.created}</small></div>)}<Field label="댓글 작성" placeholder="댓글을 입력해 주세요" value={draft.comment} onChange={v=>update('comment',v)} multi/><button className="primary" onClick={()=>{if(!draft.comment?.trim())return note('댓글을 입력해 주세요');setPosts(items=>items.map(p=>p.id===currentPost.id?{...p,comments:[...(p.comments||[]),{id:crypto.randomUUID(),content:draft.comment,created:today()}]}:p));setNotifications(n=>[{id:crypto.randomUUID(),text:`${currentPost.title}에 새 댓글이 등록되었습니다`,created:today()},...n]);update('comment','');note('댓글이 등록되었습니다 (로컬 데모)')}}>댓글 등록</button></div></>:<Empty title="게시글을 찾을 수 없습니다"/>;
+ case 'favorites':return <>{favorites.length?communityList(posts.filter(p=>favorites.includes(p.id))):<Empty icon="☆" title="아직 저장한 게시글이 없습니다"/>}<button className="secondary" onClick={()=>go('community')}>커뮤니티로 돌아가기</button></>;
+ case 'polls':return <><button className="primary" onClick={()=>go('pollNew')}>＋ 투표 작성</button><div className="panel"><strong>진행 중인 투표</strong>{polls.length?polls.map(p=><div className="record" key={p.id}><strong>{p.title}</strong>{p.options.map((o,i)=><label className="poll-option" key={i}><input type="radio" name={p.id} checked={pollChoice[p.id]===i} onChange={()=>setPollChoice(c=>({...c,[p.id]:i}))}/>{o}</label>)}<button className="secondary" onClick={()=>note('투표 선택이 기록되었습니다 (로컬 데모)')}>투표하기</button></div>):<p>등록된 투표가 없습니다</p>}</div></>;
+ case 'pollNew':return form([['투표 제목','투표 제목 입력','title'],['선택 항목 1','항목 입력','a'],['선택 항목 2','항목 입력','b']],{},v=>{if(!v.title||!v.a||!v.b)return note('투표 제목과 두 항목을 입력해 주세요');save(setPolls,[{id:crypto.randomUUID(),title:v.title,options:[v.a,v.b]},...polls],'polls')},'투표 등록');
+ case 'delivery':return <><button className="primary" onClick={()=>go('deliveryNew')}>＋ 게시글 작성</button><div className="panel"><strong>함께 주문하기</strong>{delivery.length?delivery.map(d=><div className="record" key={d.id}><strong>{d.title}</strong><p>{d.content}</p></div>):<p>등록된 게시글이 없습니다</p>}</div></>;
+ case 'deliveryNew':return form([['제목','제목 입력','title'],['내용','함께 주문할 내용을 입력해 주세요','content']],{},v=>{if(!v.title||!v.content)return note('제목과 내용을 입력해 주세요');save(setDelivery,[{...v,id:crypto.randomUUID()},...delivery],'delivery')},'게시글 등록');
+ case 'risk':return <><div className="hero-card"><strong>▤ 계약서 확인 항목 안내</strong><p>계약서 작성 전 확인할 사항을 살펴보세요</p></div><div className="panel"><strong>계약서 확인 항목</strong><p>등기부등본, 임대인 정보, 보증금, 계약 기간, 특약 사항 등을 확인하세요.</p><p className="hint">자동 위험 탐지 기능은 백엔드 연동 전입니다.</p></div></>;
+ case 'my':return <><div className="panel user-card"><span className="avatar-small">◉</span><div><strong>내 정보</strong><p>{profile.name||'등록된 개인정보를 확인하세요'}</p></div></div><Card title="내 정보 수정" sub="개인정보 및 비밀번호 변경" onClick={()=>go('profile')}/><Card title="집 정보 수정" sub="집 기본정보 및 계약 정보 수정" onClick={()=>go('houseEdit')}/></>;
+ case 'profile':return <>{form([['이름','이름 입력','name'],['이메일','이메일 주소 입력','email','email'],['전화번호','휴대전화 번호 입력','phone']],profile,v=>save(setProfile,v,'my'),'변경사항 저장')}<Card title="비밀번호 변경" sub="비밀번호 변경 화면으로 이동" onClick={()=>go('password')}/></>;
+ case 'password':return form([['현재 비밀번호','현재 비밀번호 입력','old','password'],['새 비밀번호','새 비밀번호 입력','new','password'],['새 비밀번호 확인','새 비밀번호 다시 입력','confirm','password']],{},()=>note('비밀번호 변경은 서버 연동 후 이용할 수 있어요'),'비밀번호 변경');
+ case 'houseEdit':return <><Card title="집 기본정보 수정" sub="주소 및 집 기본정보를 변경하세요" onClick={()=>go('houseFields')}/><Card title="계약 정보 수정" sub="계약 기간 및 금액 정보를 변경하세요" onClick={()=>go('contractEdit')}/></>;
+ case 'notifications':return <><div className="panel"><strong>알림 내역</strong>{notifications.length?notifications.map(n=><div className="record" key={n.id}><p>{n.text}</p><small>{n.created}</small></div>):<><p>아직 도착한 알림이 없습니다</p><p className="hint">댓글이나 답글이 달리면 여기에 표시돼요</p></>}</div><button className="secondary" onClick={()=>go('community')}>커뮤니티로 돌아가기</button></>;
+ default:return <Empty title="화면을 찾을 수 없습니다"/>;
+ }};
+ const nav=[['⌂','홈','home'],['▤','집·계약','house'],['▧','커뮤니티','community'],['▥','주거비','expenses'],['◉','MY','my']];
+ return <div className="site"><div className="phone"><header className="topbar"><button className="brand" onClick={()=>go('home')}>DOBBY<span className="brand-dot">.</span></button><button className="top-icon" aria-label="알림" onClick={()=>go('notifications')}>♧{notifications.length>0&&<i/>}</button></header><main className="main"><div className="heading">{page!=='home'&&<button className="back" onClick={back} aria-label="뒤로 가기">‹</button>}<h1>{TITLES[page]?.[0]}</h1><p>{TITLES[page]?.[1]}</p></div>{content()}</main><nav className="bottom-nav">{nav.map(([icon,label,to])=><button key={to} className={page===to?'active':''} onClick={()=>go(to)}><span>{icon}</span><small>{label}</small></button>)}</nav><input className="visually-hidden" type="file" accept="image/*" multiple ref={fileRef} onChange={photoAdd}/>{toast&&<div role="status" className="toast">{toast}</div>}</div><p className="dev-caption">DOBBY · React UI 프로토타입 · 일부 데이터는 현재 브라우저에만 저장됩니다</p></div>
 }
-
 export default App
